@@ -81,7 +81,8 @@ def validate_motors(config: ConfigParser, motor_sections: list[str]) -> bool:
 
                     if value <= 0:
                         logger.error(
-                            "Configuration paramater %s for motor definition %s can not be less than or equal to 0",
+                            "Configuration parameter %s for motor definition %s "
+                            "cannot be less than or equal to 0",
                             param,
                             name,
                         )
@@ -101,7 +102,8 @@ def validate_motors(config: ConfigParser, motor_sections: list[str]) -> bool:
 
                     if value <= 0:
                         logger.error(
-                            "Configuration paramater %s for motor definition %s can not be less than or equal to 0",
+                            "Configuration parameter %s for motor definition %s "
+                            "cannot be less than or equal to 0",
                             param,
                             name,
                         )
@@ -112,14 +114,16 @@ def validate_motors(config: ConfigParser, motor_sections: list[str]) -> bool:
                             value = config.getint(motor_name, param)
                             if value not in [200, 400]:
                                 logger.error(
-                                    "Found invalid steps per revolution for motor %s, expected 200 or 400, found %d",
+                                    "Found invalid steps per revolution for motor "
+                                    "%s, expected 200 or 400, found %d",
                                     name,
                                     value,
                                 )
                                 valid = False
                         case _:
                             raise RuntimeError(
-                                f"No custom validation rule defined form parameter {param}"
+                                "No custom validation rule defined for "
+                                f"parameter {param}"
                             )
     return valid
 
@@ -175,7 +179,8 @@ def validate_aliases(
                     s.split()[-1] == target for s in alias_sections
                 ):
                     logger.error(
-                        "Alias %s targets another alias '%s', alias chains are not allowed",
+                        "Alias %s targets another alias '%s', alias chains "
+                        "are not allowed",
                         name,
                         target,
                     )
@@ -222,7 +227,9 @@ def check_duplicates(config: ConfigParser, motor_sections: list[str]) -> None:
     for values, names in sorted(specs.items()):
         if len(names) > 1:
             found = True
-            spec_str = ", ".join("%s=%s" % (k, v) for k, v in zip(spec_keys, values))
+            spec_str = ", ".join(
+                f"{k}={v}" for k, v in zip(spec_keys, values, strict=True)
+            )
             logger.warning(
                 "Duplicate motor specs found: [%s] share identical values (%s)",
                 ", ".join(sorted(names)),

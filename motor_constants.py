@@ -24,13 +24,13 @@ class MotorConstants:
     def pwmgrad(self, fclk=12.5e6, steps=0, volts=24.0):
         if steps == 0:
             steps = self.steps_per_revolution
-        return int(
-            math.ceil(self.cbemf * 2 * math.pi * fclk * 1.46 / (volts * 256.0 * steps))
+        return math.ceil(
+            self.cbemf * 2 * math.pi * fclk * 1.46 / (volts * 256.0 * steps)
         )
 
     def pwmofs(self, volts=24.0, current=0.0):
         effective_current = current if current > 0.0 else self.max_current
-        return int(math.ceil(374 * self.coil_resistance * effective_current / volts))
+        return math.ceil(374 * self.coil_resistance * effective_current / volts)
 
     # Maximum revolutions per second before PWM maxes out.
     def maxpwmrps(self, fclk=12.5e6, steps=0, volts=24.0, current=0.0):
@@ -52,14 +52,12 @@ class MotorConstants:
             self.coil_resistance * effective_current * 2.0 * tsd / self.coil_inductance
         )
         logging.info("dcoilblank = %f, dcoilsd = %f", dcoilblank, dcoilsd)
-        hysteresis = extra + int(
-            math.ceil(
-                max(
-                    0.5
-                    + ((dcoilblank + dcoilsd) * 2 * 248 * 32 / effective_current) / 32
-                    - 8,
-                    -2,
-                )
+        hysteresis = extra + math.ceil(
+            max(
+                0.5
+                + ((dcoilblank + dcoilsd) * 2 * 248 * 32 / effective_current) / 32
+                - 8,
+                -2,
             )
         )
         htotal = min(hysteresis, 14)
@@ -86,13 +84,12 @@ class MotorAlias:
         target = printer.lookup_object(target_name, default=None)
         if target is None:
             raise printer.config_error(
-                "Motor alias '%s' references unknown motor '%s'"
-                % (self.name, self.motor)
+                f"Motor alias '{self.name}' references unknown motor '{self.motor}'"
             )
         if not isinstance(target, MotorConstants):
             raise printer.config_error(
-                "Motor alias '%s' targets '%s' which is not a motor definition"
-                % (self.name, self.motor)
+                f"Motor alias '{self.name}' targets '{self.motor}' which is "
+                "not a motor definition"
             )
         alias_key = "motor_constants " + self.name
         existing = printer.objects.get(alias_key)
