@@ -17,7 +17,7 @@ class MotorConstants:
         self.coil_resistance = config.getfloat("resistance", minval=0.0)
         self.coil_inductance = config.getfloat("inductance", above=0.0)
         self.holding_torque = config.getfloat("holding_torque", above=0.0)
-        self.steps_per_revolution = config.getint("steps_per_revolution", minval=0)
+        self.steps_per_revolution = config.getchoice("steps_per_revolution", [200, 400])
         self.max_current = config.getfloat("max_current", above=0.0)
         self.cbemf = self.holding_torque / (2.0 * self.max_current)
 
