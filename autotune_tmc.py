@@ -172,7 +172,7 @@ class AutotuneTMC:
         self.se_imin = config.getint("seimin", default=SEIMIN, minval=0, maxval=1)
 
         self.voltage = config.getfloat(
-            "voltage", default=VOLTAGE, minval=0.0, maxval=60.0
+            "voltage", default=VOLTAGE, above=0.0, maxval=60.0
         )
         # A zero threshold asserts the overvoltage condition continuously, and
         # values above the TMC2240 absolute maximum cannot protect it in time.
@@ -333,7 +333,7 @@ class AutotuneTMC:
                 gcmd.respond_info(f"SG4_THRS={sg4_thrs} out of range (0-255), ignored")
         voltage = gcmd.get_float("VOLTAGE", None)
         if voltage is not None:
-            if voltage >= 0.0 and voltage <= 60.0:
+            if voltage > 0.0 and voltage <= 60.0:
                 self.voltage = voltage
             else:
                 gcmd.respond_info(f"VOLTAGE={voltage:.1f} out of range (0-60), ignored")
