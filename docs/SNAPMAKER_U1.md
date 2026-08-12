@@ -5,18 +5,30 @@ installation using a Bespok3d package. Do not run upstream `install.sh` on the
 U1: its Linux paths, service assumptions, and Moonraker update-manager workflow
 do not match Snapmaker's firmware layout.
 
-## Why motor constants are required
+## Supported motor and driver mapping
 
-TMC Autotune calculates driver registers from each motor's phase resistance,
-phase inductance, holding torque, rated current, and step angle. Those values
-cannot be recovered from Klipper's `run_current`. Community hardware reports
-show multiple U1 motor revisions, particularly on Z, so this package does not
-pretend one guessed profile is universal.
+This package profile is deliberately limited to:
 
-Before installation, identify the labels on the fitted X/Y and Z motors and
-obtain the exact electrical data from the corresponding manufacturer datasheet.
-Enter inductance in **henries**, torque in **newton-metres**, and current in
-**amperes**. The Bespok3d form shows examples only; placeholders are not defaults.
+- X and Y: Keli `BJ42D29-100V78`, each driven by a TMC2240.
+- Z only: Keli `BJ42D22-130`, driven by a TMC2209.
+
+Both belong to Keli's two-phase BJ42D family. Keli documents that the `D` in
+the model identifies a 1.8-degree step angle, so the generated profiles safely
+fix `steps_per_revolution: 200`. Do not install this package on a U1 whose motor
+labels differ.
+
+## Why some motor constants are still required
+
+TMC Autotune also needs each motor's phase resistance, phase inductance, holding
+torque, and rated current. Those values cannot be recovered from Klipper's
+`run_current`. Keli's public BJ42D table documents standard windings but does
+not list the custom `-100V78` or `-130` performance/mechanical variants. A
+generic BJ42D29 or BJ42D22 row is therefore not a verified substitute.
+
+Before installation, obtain the four exact electrical values for each named
+motor from its OEM sheet or measurements. Enter inductance in **henries**,
+torque in **newton-metres**, and current in **amperes**. The form intentionally
+does not suggest values from a different winding.
 
 ## U1-specific safety choices
 
@@ -34,9 +46,9 @@ Enter inductance in **henries**, torque in **newton-metres**, and current in
 
 1. Make sure the printer is idle and cool.
 2. In Bespok3d Desktop, choose **Add plugin from file** and select the built
-   `u1-klipper-tmc-autotune-0.2.0-u1.1.b3` package.
-3. Enter the ten motor values for this printer. Do not proceed with approximate
-   values copied from an unrelated NEMA 17 motor.
+   `u1-klipper-tmc-autotune-0.2.0-u1.2.b3` package.
+3. Confirm the motor labels match the supported mapping and enter the eight
+   electrical values. Do not use values from a generic BJ42D table row.
 4. Bespok3d installs the three Klipper extras, renders the configuration,
    restarts Klipper, and rolls back automatically if Klipper fails to return.
 5. Confirm Klipper reports **Ready** before attempting to home or move.

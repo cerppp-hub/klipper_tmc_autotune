@@ -2,10 +2,10 @@
 
 > [!IMPORTANT]
 > The `snapmaker-u1` branch packages this extension for the Snapmaker U1 through
-> Bespok3d. It preserves the U1's sensorless-homing thresholds and requires the
-> installer to enter the electrical constants for the motors fitted to that
-> specific printer. Snapmaker has shipped more than one motor revision, so this
-> fork deliberately does not guess those safety-critical values.
+> Bespok3d. It targets BJ42D29-100V78 motors on the TMC2240 X/Y axes and a
+> BJ42D22-130 motor on the TMC2209 Z axis, preserves the U1's sensorless-homing
+> thresholds, and requires the installer to enter the unpublished electrical
+> winding constants. The documented 1.8-degree step angle is built in.
 >
 > See [Snapmaker U1 installation and configuration](docs/SNAPMAKER_U1.md). The
 > unmodified upstream history remains on the `main` branch.

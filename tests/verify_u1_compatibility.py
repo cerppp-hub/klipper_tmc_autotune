@@ -33,7 +33,8 @@ def verify_manifest() -> None:
     manifest = json.loads((PACKAGE_ROOT / "manifest.json").read_text(encoding="utf-8"))
     assert manifest["channel"] == "experiment"
     assert manifest["install"]["restart"] == ["klipper"]
-    assert len(manifest["requires"]["variables"]) == 10
+    assert manifest["version"] == "0.2.0-u1.2"
+    assert len(manifest["requires"]["variables"]) == 8
     assert all(field["scope"] == "printer" for field in manifest["config"])
     assert all(field["required"] for field in manifest["config"])
     classes = [entry["class"] for entry in manifest["install"]["place"]]
@@ -44,19 +45,25 @@ def verify_manifest() -> None:
 def verify_template() -> None:
     text = TEMPLATE.read_text(encoding="utf-8")
     placeholders = set(re.findall(r"\$U1_[A-Z_]+", text))
-    assert len(placeholders) == 10
+    assert len(placeholders) == 8
     require_text(
         TEMPLATE,
         (
             "[autotune_tmc stepper_x]",
             "[autotune_tmc stepper_y]",
             "[autotune_tmc stepper_z]",
+            "[motor_constants keli-bj42d29-100v78]",
+            "[motor_constants keli-bj42d22-130]",
+            "motor: keli-bj42d29-100v78",
+            "motor: keli-bj42d22-130",
+            "steps_per_revolution: 200",
             "tuning_goal: performance",
             "sgt: 1",
             "sg4_thrs: 0",
             "sg4_thrs: 110",
         ),
     )
+    assert "STEPS_PER_REVOLUTION" not in text
     assert "[autotune_tmc extruder" not in text
 
 
