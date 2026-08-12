@@ -33,16 +33,12 @@ def verify_manifest() -> None:
     manifest = json.loads((PACKAGE_ROOT / "manifest.json").read_text(encoding="utf-8"))
     assert manifest["channel"] == "experiment"
     assert manifest["install"]["restart"] == ["klipper"]
-    assert manifest["version"] == "0.2.0-u1.3"
-    assert len(manifest["requires"]["variables"]) == 8
+    assert manifest["version"] == "0.2.0-u1.4"
+    assert len(manifest["requires"]["variables"]) == 4
     assert all(field["scope"] == "printer" for field in manifest["config"])
     assert all(field["required"] for field in manifest["config"])
     defaults = {field["key"]: field["default"] for field in manifest["config"]}
     assert defaults == {
-        "U1_XY_RESISTANCE": "2.2",
-        "U1_XY_INDUCTANCE": "0.0045",
-        "U1_XY_HOLDING_TORQUE": "0.60",
-        "U1_XY_MAX_CURRENT": "1.5",
         "U1_Z_RESISTANCE": "4.0",
         "U1_Z_INDUCTANCE": "0.0079",
         "U1_Z_HOLDING_TORQUE": "0.40",
@@ -56,18 +52,22 @@ def verify_manifest() -> None:
 def verify_template() -> None:
     text = TEMPLATE.read_text(encoding="utf-8")
     placeholders = set(re.findall(r"\$U1_[A-Z_]+", text))
-    assert len(placeholders) == 8
+    assert len(placeholders) == 4
     require_text(
         TEMPLATE,
         (
             "[autotune_tmc stepper_x]",
             "[autotune_tmc stepper_y]",
             "[autotune_tmc stepper_z]",
-            "[motor_constants keli-bj42d29-100v78]",
+            "[motor_constants keli-bj42d29-y2v01]",
             "[motor_constants keli-bj42d22-130]",
-            "motor: keli-bj42d29-100v78",
+            "motor: keli-bj42d29-y2v01",
             "motor: keli-bj42d22-130",
             "steps_per_revolution: 200",
+            "resistance: 2.2",
+            "inductance: 0.0045",
+            "holding_torque: 0.60",
+            "max_current: 1.5",
             "tuning_goal: performance",
             "sgt: 1",
             "sg4_thrs: 0",
@@ -75,6 +75,7 @@ def verify_template() -> None:
         ),
     )
     assert "STEPS_PER_REVOLUTION" not in text
+    assert "U1_XY_" not in text
     assert "[autotune_tmc extruder" not in text
 
 

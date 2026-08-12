@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0-u1.4 - 2026-08-12
+
+- Identify the X/Y motors as Keli BJ42D29-Y2V01.
+- Fix the X/Y profile to Keli's published 2.2-ohm, 4.5-mH, 0.60-Nm, 1.5-A, 1.8-degree specifications.
+- Remove the four X/Y installer fields; only the less-certain BJ42D22-130 Z profile remains editable.
+
 ## 0.2.0-u1.3 - 2026-08-12
 
 - Add editable electrical defaults from Keli's BJ42D29-Y2 and BJ42D22-Y2 profiles.

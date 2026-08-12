@@ -2,10 +2,10 @@
 
 > [!IMPORTANT]
 > The `snapmaker-u1` branch packages this extension for the Snapmaker U1 through
-> Bespok3d. It targets BJ42D29-100V78 motors on the TMC2240 X/Y axes and a
+> Bespok3d. It targets BJ42D29-Y2V01 motors on the TMC2240 X/Y axes and a
 > BJ42D22-130 motor on the TMC2209 Z axis, preserves the U1's sensorless-homing
-> thresholds, and provides editable electrical defaults correlated with the
-> printer's stock run currents. The documented 1.8-degree step angle is built in.
+> thresholds. The published X/Y constants are built in; the Z electrical profile
+> remains editable and defaults to values correlated with its stock run current.
 >
 > See [Snapmaker U1 installation and configuration](docs/SNAPMAKER_U1.md). The
 > unmodified upstream history remains on the `main` branch.
