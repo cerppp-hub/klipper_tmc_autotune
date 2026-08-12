@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class ValueType(IntEnum):
     INTEGER = 0
     FLOAT = 1
-    CUSTOM = 2
+    CHOICE = 2
 
 
 MOTOR_PARAMS: dict[str, ValueType] = {
@@ -22,7 +22,11 @@ MOTOR_PARAMS: dict[str, ValueType] = {
     "inductance": ValueType.FLOAT,
     "max_current": ValueType.FLOAT,
     "resistance": ValueType.FLOAT,
-    "steps_per_revolution": ValueType.CUSTOM,
+    "steps_per_revolution": ValueType.CHOICE,
+}
+
+PARAM_CHOICES: dict[str, list[int]] = {
+    "steps_per_revolution": [200, 400],
 }
 
 ALIAS_REQUIRED_PARAMS: set[str] = {"motor"}
@@ -70,7 +74,7 @@ def validate_motors(config: ConfigParser, motor_sections: list[str]) -> bool:
                     try:
                         value = config.getfloat(motor_name, param)
                     except ValueError:
-                        logging.error(
+                        logger.error(
                             "Invalid value %s for parameter %s in motor definition %s",
                             config.get(motor_name, param),
                             param,
@@ -91,7 +95,7 @@ def validate_motors(config: ConfigParser, motor_sections: list[str]) -> bool:
                     try:
                         value = config.getint(motor_name, param)
                     except ValueError:
-                        logging.error(
+                        logger.error(
                             "Invalid value %s for parameter %s in motor definition %s",
                             config.get(motor_name, param),
                             param,
@@ -108,23 +112,30 @@ def validate_motors(config: ConfigParser, motor_sections: list[str]) -> bool:
                             name,
                         )
                         valid = False
-                case ValueType.CUSTOM:
-                    match param:
-                        case "steps_per_revolution":
-                            value = config.getint(motor_name, param)
-                            if value not in [200, 400]:
-                                logger.error(
-                                    "Found invalid steps per revolution for motor "
-                                    "%s, expected 200 or 400, found %d",
-                                    name,
-                                    value,
-                                )
-                                valid = False
-                        case _:
-                            raise RuntimeError(
-                                "No custom validation rule defined for "
-                                f"parameter {param}"
-                            )
+                case ValueType.CHOICE:
+                    try:
+                        value = config.getint(motor_name, param)
+                    except ValueError:
+                        logger.error(
+                            "Invalid value %s for parameter %s in motor definition %s",
+                            config.get(motor_name, param),
+                            param,
+                            name,
+                        )
+                        valid = False
+                        continue
+
+                    choices = PARAM_CHOICES[param]
+                    if value not in choices:
+                        logger.error(
+                            "Invalid value for parameter %s in motor definition "
+                            "%s: expected one of %s, found %d",
+                            param,
+                            name,
+                            choices,
+                            value,
+                        )
+                        valid = False
     return valid
 
 
