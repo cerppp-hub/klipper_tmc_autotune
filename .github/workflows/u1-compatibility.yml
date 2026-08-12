@@ -1,0 +1,24 @@
+name: Snapmaker U1 compatibility
+
+on:
+  push:
+    branches: [snapmaker-u1]
+  pull_request:
+    branches: [snapmaker-u1]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Snapmaker/u1-klipper
+          path: u1-klipper
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python tests/verify_u1_compatibility.py
+        env:
+          U1_KLIPPER_ROOT: u1-klipper
+      - run: python scripts/stage_bespok3d.py

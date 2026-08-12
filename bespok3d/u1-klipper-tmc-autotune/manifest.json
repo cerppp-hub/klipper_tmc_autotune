@@ -1,0 +1,71 @@
+{
+  "name": "u1-klipper-tmc-autotune",
+  "title": "TMC Autotune for Snapmaker U1",
+  "version": "0.2.0-u1.1",
+  "sw_version": "0.2.0+git.b6c7cfa",
+  "author": "Andrew McGregor and contributors; Snapmaker U1 adaptation contributors",
+  "description": "Packages Klipper TMC Autotune for the Snapmaker U1 vendor Klipper layout. Bespok3d collects the installed X/Y and Z motor constants, renders a printer-specific configuration, preserves the stock sensorless-homing thresholds, and handles placement, restart, rollback, reconfiguration, and removal.",
+  "tagline": "Motor-aware TMC tuning with U1-safe configuration.",
+  "category": "tuning",
+  "channel": "experiment",
+  "printer_specific": true,
+  "changelog": "doc/CHANGELOG.md",
+  "published_at": "2026-08-12",
+  "updated_at": "2026-08-12",
+  "min_daemon_version": "0.10.33",
+  "source": "https://github.com/cerppp-hub/klipper_tmc_autotune/tree/snapmaker-u1",
+  "publisher": "LOCAL-UNSIGNED",
+  "provides": [
+    { "service": "klipper-tmc-autotune" }
+  ],
+  "require": [],
+  "conflicts": [],
+  "requires": {
+    "capabilities": ["klipper-generic"],
+    "variables": [
+      { "name": "U1_XY_RESISTANCE", "description": "X/Y motor phase resistance in ohms from the exact motor datasheet or measurement.", "required": true },
+      { "name": "U1_XY_INDUCTANCE", "description": "X/Y motor phase inductance in henries from the exact motor datasheet or measurement.", "required": true },
+      { "name": "U1_XY_HOLDING_TORQUE", "description": "X/Y motor holding torque in newton-metres.", "required": true },
+      { "name": "U1_XY_MAX_CURRENT", "description": "X/Y motor rated phase current in amperes.", "required": true },
+      { "name": "U1_XY_STEPS_PER_REVOLUTION", "description": "X/Y motor full steps per revolution; normally 200 for a 1.8-degree motor.", "required": true },
+      { "name": "U1_Z_RESISTANCE", "description": "Z motor phase resistance in ohms from the exact motor datasheet or measurement.", "required": true },
+      { "name": "U1_Z_INDUCTANCE", "description": "Z motor phase inductance in henries from the exact motor datasheet or measurement.", "required": true },
+      { "name": "U1_Z_HOLDING_TORQUE", "description": "Z motor holding torque in newton-metres.", "required": true },
+      { "name": "U1_Z_MAX_CURRENT", "description": "Z motor rated phase current in amperes.", "required": true },
+      { "name": "U1_Z_STEPS_PER_REVOLUTION", "description": "Z motor full steps per revolution; normally 200 for a 1.8-degree motor.", "required": true }
+    ]
+  },
+  "config": [
+    { "key": "U1_XY_RESISTANCE", "label": "X/Y resistance (ohms)", "type": "number", "placeholder": "1.0", "hint": "Use the per-phase value for the exact X/Y motor revision fitted to this U1.", "required": true, "scope": "printer", "userEditable": true },
+    { "key": "U1_XY_INDUCTANCE", "label": "X/Y inductance (henries)", "type": "number", "placeholder": "0.0019", "hint": "Enter henries, not millihenries: divide a datasheet mH value by 1000.", "required": true, "scope": "printer", "userEditable": true },
+    { "key": "U1_XY_HOLDING_TORQUE", "label": "X/Y holding torque (Nm)", "type": "number", "placeholder": "0.52", "hint": "Enter newton-metres, not Ncm or mNm.", "required": true, "scope": "printer", "userEditable": true },
+    { "key": "U1_XY_MAX_CURRENT", "label": "X/Y rated current (A)", "type": "number", "placeholder": "2.0", "hint": "Use the motor's rated phase current, not Klipper's run_current.", "required": true, "scope": "printer", "userEditable": true },
+    { "key": "U1_XY_STEPS_PER_REVOLUTION", "label": "X/Y full steps per revolution", "type": "select", "options": ["200", "400"], "default": "200", "hint": "200 corresponds to 1.8 degrees per full step; 400 corresponds to 0.9 degrees.", "required": true, "scope": "printer", "userEditable": true },
+    { "key": "U1_Z_RESISTANCE", "label": "Z resistance (ohms)", "type": "number", "placeholder": "2.3", "hint": "Use the per-phase value for the exact Z motor revision fitted to this U1.", "required": true, "scope": "printer", "userEditable": true },
+    { "key": "U1_Z_INDUCTANCE", "label": "Z inductance (henries)", "type": "number", "placeholder": "0.0043", "hint": "Enter henries, not millihenries: divide a datasheet mH value by 1000.", "required": true, "scope": "printer", "userEditable": true },
+    { "key": "U1_Z_HOLDING_TORQUE", "label": "Z holding torque (Nm)", "type": "number", "placeholder": "0.40", "hint": "Enter newton-metres, not Ncm or mNm.", "required": true, "scope": "printer", "userEditable": true },
+    { "key": "U1_Z_MAX_CURRENT", "label": "Z rated current (A)", "type": "number", "placeholder": "1.5", "hint": "Use the motor's rated phase current, not Klipper's run_current.", "required": true, "scope": "printer", "userEditable": true },
+    { "key": "U1_Z_STEPS_PER_REVOLUTION", "label": "Z full steps per revolution", "type": "select", "options": ["200", "400"], "default": "200", "hint": "200 corresponds to 1.8 degrees per full step; 400 corresponds to 0.9 degrees.", "required": true, "scope": "printer", "userEditable": true }
+  ],
+  "permissions": ["klipper-extra", "klipper-config", "restart"],
+  "install": {
+    "templates": [
+      {
+        "from": "files/cfg/klipper/u1-klipper-tmc-autotune.cfg.tmpl",
+        "to": "files/cfg/klipper/u1-klipper-tmc-autotune.cfg"
+      }
+    ],
+    "place": [
+      { "class": "klipper-extra", "src": "files/klipper/klippy/extras/autotune_tmc.py" },
+      { "class": "klipper-extra", "src": "files/klipper/klippy/extras/motor_constants.py" },
+      { "class": "klipper-extra", "src": "files/klipper/klippy/extras/motor_database.cfg" },
+      { "class": "klipper-config", "src": "files/cfg/klipper/u1-klipper-tmc-autotune.cfg" }
+    ],
+    "restart": ["klipper"]
+  },
+  "endpoints": [],
+  "conflict_resolutions": [],
+  "files": [],
+  "license": "https://github.com/cerppp-hub/klipper_tmc_autotune/blob/snapmaker-u1/LICENSE",
+  "attributions": "Klipper TMC Autotune is copyright Andrew McGregor and contributors and is licensed under GPL-3.0. This package is based on upstream commit b6c7cfa98c2ef880812d5279a9117cbe67d6d4d5. The Snapmaker U1 adaptation adds Bespok3d packaging, a variable-rendered U1 configuration, compatibility tests, and documentation; it does not alter the upstream tuning algorithm. Complete corresponding source is available in the public fork."
+}

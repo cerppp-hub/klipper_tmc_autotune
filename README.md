@@ -1,5 +1,15 @@
 # Klipper TMC Autotune
 
+> [!IMPORTANT]
+> The `snapmaker-u1` branch packages this extension for the Snapmaker U1 through
+> Bespok3d. It preserves the U1's sensorless-homing thresholds and requires the
+> installer to enter the electrical constants for the motors fitted to that
+> specific printer. Snapmaker has shipped more than one motor revision, so this
+> fork deliberately does not guess those safety-critical values.
+>
+> See [Snapmaker U1 installation and configuration](docs/SNAPMAKER_U1.md). The
+> unmodified upstream history remains on the `main` branch.
+
 Klipper extension for automatic configuration and tuning of TMC drivers.
 
 This extension calculates good values for most registers of TMC stepper motor drivers, given the motor's datasheet information and user selected tuning goal.
