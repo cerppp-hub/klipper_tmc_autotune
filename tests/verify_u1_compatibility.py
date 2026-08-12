@@ -33,10 +33,21 @@ def verify_manifest() -> None:
     manifest = json.loads((PACKAGE_ROOT / "manifest.json").read_text(encoding="utf-8"))
     assert manifest["channel"] == "experiment"
     assert manifest["install"]["restart"] == ["klipper"]
-    assert manifest["version"] == "0.2.0-u1.2"
+    assert manifest["version"] == "0.2.0-u1.3"
     assert len(manifest["requires"]["variables"]) == 8
     assert all(field["scope"] == "printer" for field in manifest["config"])
     assert all(field["required"] for field in manifest["config"])
+    defaults = {field["key"]: field["default"] for field in manifest["config"]}
+    assert defaults == {
+        "U1_XY_RESISTANCE": "2.2",
+        "U1_XY_INDUCTANCE": "0.0045",
+        "U1_XY_HOLDING_TORQUE": "0.60",
+        "U1_XY_MAX_CURRENT": "1.5",
+        "U1_Z_RESISTANCE": "4.0",
+        "U1_Z_INDUCTANCE": "0.0079",
+        "U1_Z_HOLDING_TORQUE": "0.40",
+        "U1_Z_MAX_CURRENT": "1.0",
+    }
     classes = [entry["class"] for entry in manifest["install"]["place"]]
     assert classes.count("klipper-extra") == 3
     assert classes.count("klipper-config") == 1

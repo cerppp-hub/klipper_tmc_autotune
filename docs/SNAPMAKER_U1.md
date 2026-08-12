@@ -17,18 +17,33 @@ the model identifies a 1.8-degree step angle, so the generated profiles safely
 fix `steps_per_revolution: 200`. Do not install this package on a U1 whose motor
 labels differ.
 
-## Why some motor constants are still required
+## Electrical profile and evidence
 
-TMC Autotune also needs each motor's phase resistance, phase inductance, holding
-torque, and rated current. Those values cannot be recovered from Klipper's
-`run_current`. Keli's public BJ42D table documents standard windings but does
-not list the custom `-100V78` or `-130` performance/mechanical variants. A
-generic BJ42D29 or BJ42D22 row is therefore not a verified substitute.
+The package uses Keli's published Y2-winding profiles as editable defaults:
 
-Before installation, obtain the four exact electrical values for each named
-motor from its OEM sheet or measurements. Enter inductance in **henries**,
-torque in **newton-metres**, and current in **amperes**. The form intentionally
-does not suggest values from a different winding.
+| Axis | Profile basis | Resistance | Inductance | Holding torque | Rated current | U1 run current |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| X/Y | BJ42D29-Y2 | 2.2 ohms | 4.5 mH | 0.60 Nm | 1.5 A | 1.2 A (80%) |
+| Z | BJ42D22-Y2 | 4.0 ohms | 7.9 mH | 0.40 Nm | 1.0 A | 0.85 A (85%) |
+
+The exact agreement between the U1's stock X/Y current and 80% of the BJ42D29-Y2
+rating is strong corroborating evidence. The Z current similarly lands at 85%
+of the BJ42D22-Y2 rating. These values also match the motors' BJ42D29 and BJ42D22
+frame/stator families and documented 1.8-degree construction.
+
+Keli's public table does not list the custom `-100V78` or `-130` performance and
+mechanical variants, however, so this remains an evidence-based identification
+rather than a published cross-reference from Keli or Snapmaker.
+
+Sources:
+
+- [Keli BJ42D technical parameters](https://en.kelimotor.com/applist_detail/97.html)
+- [Klipper configuration reference](https://www.klipper3d.org/Config_Reference.html#tmc2240), which defines `run_current` in amps RMS
+
+The installer pre-fills the table values and keeps all eight fields editable.
+If an exact OEM sheet or measurement becomes available, override the relevant
+value. Inductance is entered in **henries**, torque in **newton-metres**, and
+current in **amperes**.
 
 ## U1-specific safety choices
 
@@ -46,9 +61,10 @@ does not suggest values from a different winding.
 
 1. Make sure the printer is idle and cool.
 2. In Bespok3d Desktop, choose **Add plugin from file** and select the built
-   `u1-klipper-tmc-autotune-0.2.0-u1.2.b3` package.
-3. Confirm the motor labels match the supported mapping and enter the eight
-   electrical values. Do not use values from a generic BJ42D table row.
+   `u1-klipper-tmc-autotune-0.2.0-u1.3.b3` package.
+3. Confirm the motor labels match the supported mapping and review the eight
+   pre-filled Y2-profile values. Override them only with better model-specific
+   evidence.
 4. Bespok3d installs the three Klipper extras, renders the configuration,
    restarts Klipper, and rolls back automatically if Klipper fails to return.
 5. Confirm Klipper reports **Ready** before attempting to home or move.

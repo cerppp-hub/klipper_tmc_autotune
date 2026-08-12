@@ -1,10 +1,10 @@
 {
   "name": "u1-klipper-tmc-autotune",
   "title": "TMC Autotune for Snapmaker U1",
-  "version": "0.2.0-u1.2",
+  "version": "0.2.0-u1.3",
   "sw_version": "0.2.0+git.b6c7cfa",
   "author": "Andrew McGregor and contributors; Snapmaker U1 adaptation contributors",
-  "description": "Packages Klipper TMC Autotune for the Snapmaker U1 vendor Klipper layout, targeting BJ42D29-100V78 motors on the TMC2240 X/Y axes and a BJ42D22-130 motor on the TMC2209 Z axis. Bespok3d collects the unpublished winding constants, renders a printer-specific configuration, preserves the stock sensorless-homing thresholds, and handles placement, restart, rollback, reconfiguration, and removal.",
+  "description": "Packages Klipper TMC Autotune for the Snapmaker U1 vendor Klipper layout, targeting BJ42D29-100V78 motors on the TMC2240 X/Y axes and a BJ42D22-130 motor on the TMC2209 Z axis. Bespok3d supplies editable Y2-winding defaults correlated with the U1's stock currents, renders a printer-specific configuration, preserves the stock sensorless-homing thresholds, and handles placement, restart, rollback, reconfiguration, and removal.",
   "tagline": "Motor-aware TMC tuning with U1-safe configuration.",
   "category": "tuning",
   "channel": "experiment",
@@ -34,14 +34,14 @@
     ]
   },
   "config": [
-    { "key": "U1_XY_RESISTANCE", "label": "BJ42D29-100V78 resistance (ohms)", "type": "number", "hint": "Enter the exact per-phase resistance; generic BJ42D29 values are not interchangeable.", "required": true, "scope": "printer", "userEditable": true },
-    { "key": "U1_XY_INDUCTANCE", "label": "BJ42D29-100V78 inductance (henries)", "type": "number", "hint": "Enter henries, not millihenries: divide the exact per-phase mH value by 1000.", "required": true, "scope": "printer", "userEditable": true },
-    { "key": "U1_XY_HOLDING_TORQUE", "label": "BJ42D29-100V78 holding torque (Nm)", "type": "number", "hint": "Enter newton-metres, not Ncm or mNm.", "required": true, "scope": "printer", "userEditable": true },
-    { "key": "U1_XY_MAX_CURRENT", "label": "BJ42D29-100V78 rated current (A)", "type": "number", "hint": "Use the motor's rated phase current, not Klipper's 1.2 A run_current.", "required": true, "scope": "printer", "userEditable": true },
-    { "key": "U1_Z_RESISTANCE", "label": "BJ42D22-130 resistance (ohms)", "type": "number", "hint": "Enter the exact per-phase resistance; generic BJ42D22 values are not interchangeable.", "required": true, "scope": "printer", "userEditable": true },
-    { "key": "U1_Z_INDUCTANCE", "label": "BJ42D22-130 inductance (henries)", "type": "number", "hint": "Enter henries, not millihenries: divide the exact per-phase mH value by 1000.", "required": true, "scope": "printer", "userEditable": true },
-    { "key": "U1_Z_HOLDING_TORQUE", "label": "BJ42D22-130 holding torque (Nm)", "type": "number", "hint": "Enter newton-metres, not Ncm or mNm.", "required": true, "scope": "printer", "userEditable": true },
-    { "key": "U1_Z_MAX_CURRENT", "label": "BJ42D22-130 rated current (A)", "type": "number", "hint": "Use the motor's rated phase current, not Klipper's 0.85 A run_current.", "required": true, "scope": "printer", "userEditable": true }
+    { "key": "U1_XY_RESISTANCE", "label": "BJ42D29-100V78 resistance (ohms)", "type": "number", "default": "2.2", "hint": "Y2-winding default: 2.2 ohms per phase. Override if an exact -100V78 sheet or measurement differs.", "required": true, "scope": "printer", "userEditable": true },
+    { "key": "U1_XY_INDUCTANCE", "label": "BJ42D29-100V78 inductance (henries)", "type": "number", "default": "0.0045", "hint": "Y2-winding default: 4.5 mH, expressed here as 0.0045 H.", "required": true, "scope": "printer", "userEditable": true },
+    { "key": "U1_XY_HOLDING_TORQUE", "label": "BJ42D29-100V78 holding torque (Nm)", "type": "number", "default": "0.60", "hint": "Y2-winding default: 600 mNm, expressed here as 0.60 Nm.", "required": true, "scope": "printer", "userEditable": true },
+    { "key": "U1_XY_MAX_CURRENT", "label": "BJ42D29-100V78 rated current (A)", "type": "number", "default": "1.5", "hint": "Y2-winding default: 1.5 A; the stock 1.2 A RMS run_current is exactly 80% of this rating.", "required": true, "scope": "printer", "userEditable": true },
+    { "key": "U1_Z_RESISTANCE", "label": "BJ42D22-130 resistance (ohms)", "type": "number", "default": "4.0", "hint": "Y2-winding default: 4.0 ohms per phase. Override if an exact -130 sheet or measurement differs.", "required": true, "scope": "printer", "userEditable": true },
+    { "key": "U1_Z_INDUCTANCE", "label": "BJ42D22-130 inductance (henries)", "type": "number", "default": "0.0079", "hint": "Y2-winding default: 7.9 mH, expressed here as 0.0079 H.", "required": true, "scope": "printer", "userEditable": true },
+    { "key": "U1_Z_HOLDING_TORQUE", "label": "BJ42D22-130 holding torque (Nm)", "type": "number", "default": "0.40", "hint": "Y2-winding default: 400 mNm, expressed here as 0.40 Nm.", "required": true, "scope": "printer", "userEditable": true },
+    { "key": "U1_Z_MAX_CURRENT", "label": "BJ42D22-130 rated current (A)", "type": "number", "default": "1.0", "hint": "Y2-winding default: 1.0 A; the stock 0.85 A RMS run_current is 85% of this rating.", "required": true, "scope": "printer", "userEditable": true }
   ],
   "permissions": ["klipper-extra", "klipper-config", "restart"],
   "install": {

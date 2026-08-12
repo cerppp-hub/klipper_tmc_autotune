@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0-u1.3 - 2026-08-12
+
+- Add editable electrical defaults from Keli's BJ42D29-Y2 and BJ42D22-Y2 profiles.
+- Document the supporting stock-current correlation: 1.2 A is 80% of the XY profile's 1.5 A rating, while 0.85 A is 85% of the Z profile's 1.0 A rating.
+- Keep the values overridable because the exact OEM `-100V78` and `-130` winding sheets remain unpublished.
+
 ## 0.2.0-u1.2 - 2026-08-12
 
 - Target the confirmed U1 motion-motor mapping: BJ42D29-100V78 on the TMC2240 X/Y axes and BJ42D22-130 on the TMC2209 Z axis.
