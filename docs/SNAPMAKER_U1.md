@@ -1,91 +1,98 @@
 # Snapmaker U1 installation and configuration
 
-This branch adapts Klipper TMC Autotune to the U1's appliance-style Klipper
-installation using a Bespok3d package. Do not run upstream `install.sh` on the
-U1: its Linux paths, service assumptions, and Moonraker update-manager workflow
-do not match Snapmaker's firmware layout.
+This branch packages Klipper TMC Autotune for a Snapmaker U1 whose X and Y
+motors have been upgraded to LDO-42STH48-2504MACF units. It uses Bespok3d for
+the U1's appliance-style Klipper layout. Do not run upstream `install.sh` on
+the printer.
 
-## Supported motor and driver mapping
+## Scope
 
-This package profile is deliberately limited to:
+- X and Y: LDO-42STH48-2504MACF, driven by the stock TMC2240 drivers.
+- Z: not tuned; the stock TMC2209 configuration remains active.
+- Toolhead extruders: not tuned.
+- Goal: `auto`, which resolves to performance/SpreadCycle for X and Y.
+- Sensorless homing: stock TMC2240 SGT path, `sgt: 1`, `sg4_thrs: 0`.
+- Small hysteresis: enabled for X and Y.
 
-- X and Y: Keli `BJ42D29-Y2V01`, each driven by a TMC2240.
-- Z only: Keli `BJ42D22-130`, driven by a TMC2209.
+The motor is already present in upstream `motor_database.cfg` with these
+published constants:
 
-Both belong to Keli's two-phase BJ42D family. Keli documents that the `D` in
-the model identifies a 1.8-degree step angle, so the generated profiles safely
-fix `steps_per_revolution: 200`. Do not install this package on a U1 whose motor
-labels differ.
+| Resistance | Inductance | Holding torque | Rated current | Full steps/revolution |
+| ---: | ---: | ---: | ---: | ---: |
+| 1.2 ohms | 1.5 mH | 0.45 Nm | 2.5 A | 400 (0.9 degree) |
 
-## Electrical profile and evidence
+The package does not change the U1's configured X/Y `run_current`. Confirm that
+the current is appropriate for the installed motors and mechanical load before
+high-speed testing.
 
-The package uses Keli's published Y2-winding profiles as editable defaults:
+## TOFF persistence update
 
-| Axis | Profile basis | Resistance | Inductance | Holding torque | Rated current | U1 run current |
-| --- | --- | ---: | ---: | ---: | ---: | ---: |
-| X/Y | BJ42D29-Y2V01 | 2.2 ohms | 4.5 mH | 0.60 Nm | 1.5 A | 1.2 A (80%) |
-| Z | BJ42D22-Y2 | 4.0 ohms | 7.9 mH | 0.40 Nm | 1.0 A | 0.85 A (85%) |
+The packaged upstream snapshot is commit
+`b6c7cfa98c2ef880812d5279a9117cbe67d6d4d5`. It includes commit
+`a4f4daa0b3512b751bb95cd20759e36a4963c25f`, which fixes tuned TOFF values being
+replaced by Klipper's earlier virtual-enable snapshot when a stepper is
+re-enabled.
 
-The X/Y identification is exact, so its published values are fixed in the
-generated configuration. The stock 1.2 A current is also exactly 80% of its
-1.5 A rating. The Z current lands at 85% of the BJ42D22-Y2 rating, supporting
-that profile as the best available match.
+## Runtime tuning and raw TMC fields
 
-Keli's public table does not list the custom Z `-130` performance/mechanical
-variant, however, so only the Z profile remains an evidence-based inference.
+Autotune-managed parameters should be changed through `AUTOTUNE_TMC`, which
+updates Autotune's in-memory state and immediately retunes the driver:
 
-Sources:
+```gcode
+AUTOTUNE_TMC STEPPER=stepper_x SMALL_HYSTERESIS=0
+AUTOTUNE_TMC STEPPER=stepper_y SMALL_HYSTERESIS=0
+```
 
-- [Keli BJ42D technical parameters](https://en.kelimotor.com/applist_detail/97.html)
-- [Klipper configuration reference](https://www.klipper3d.org/Config_Reference.html#tmc2240), which defines `run_current` in amps RMS
+Use `SMALL_HYSTERESIS=1` to enable it again. `TOFF`, `TBL`, `TPFD`,
+`EXTRA_HYSTERESIS`, `SGT`, and other supported Autotune parameters can be
+supplied on the same command.
 
-The installer fixes the verified X/Y values and pre-fills four editable Z
-values. If an exact Z OEM sheet or measurement becomes available, override the
-relevant value. Inductance is entered in **henries**, torque in
-**newton-metres**, and current in **amperes**.
+The U1 Klipper build also exposes every writable field registered by its
+TMC2240 driver through the standard command:
 
-## U1-specific safety choices
+```gcode
+SET_TMC_FIELD STEPPER=stepper_x FIELD=en_pwm_mode VALUE=0
+SET_TMC_FIELD STEPPER=stepper_y FIELD=en_pwm_mode VALUE=0
+SET_TMC_FIELD STEPPER=stepper_x FIELD=small_hysteresis VALUE=1
+```
 
-- Only `stepper_x`, `stepper_y`, and `stepper_z` are tuned. The four removable
-  toolheads are intentionally excluded.
-- X and Y retain the stock TMC2240 `sgt: 1` sensorless-homing threshold.
-- Z retains the stock TMC2209 `sg4_thrs: 110` threshold.
-- All three axes use `tuning_goal: performance` (SpreadCycle). The upstream
-  `auto` goal would choose silent mode for Z, which is inappropriate for the
-  U1's sensorless Z homing path.
-- The package leaves the stock run currents unchanged: 1.2 A on X/Y and 0.85 A
-  on Z in the audited U1 firmware snapshot.
+`SET_TMC_FIELD` is a direct runtime register write. It is not saved to the
+configuration, and an Autotune rerun, homing transition, driver reset, Klipper
+restart, or stepper re-enable may restore an Autotune- or Klipper-managed value.
+In particular, change TOFF with `AUTOTUNE_TMC ... TOFF=<value>` rather than a raw
+field write so the TOFF persistence handler retains the intended value.
 
-## Install with Bespok3d
+Arbitrary TMC field writes can disable protection or motion-control behavior.
+Change one field at a time, record the prior `DUMP_TMC` output, and keep access
+to the power switch.
 
-1. Make sure the printer is idle and cool.
-2. In Bespok3d Desktop, choose **Add plugin from file** and select the built
-   `u1-klipper-tmc-autotune-0.2.0-u1.4.b3` package.
-3. Confirm the motor labels match the supported mapping and review the four
-   pre-filled Z profile values. Override them only with better model-specific
-   evidence.
-4. Bespok3d installs the three Klipper extras, renders the configuration,
-   restarts Klipper, and rolls back automatically if Klipper fails to return.
+## Install
+
+1. Confirm both X/Y motor labels and wiring match LDO-42STH48-2504MACF.
+2. Make sure the printer is idle and cool.
+3. In Bespok3d Desktop, choose **Add plugin from file** and select
+   `u1-klipper-tmc-autotune-0.2.0-u1.5.b3`.
+4. Let Bespok3d install the three Klipper extras and X/Y configuration, then
+   restart Klipper.
 5. Confirm Klipper reports **Ready** before attempting to home or move.
 
-## Validate after installation
+## Validate
 
-With the printer clear of obstructions, inspect the Klipper log for
-`autotune_tmc set stepper_x`, `stepper_y`, and `stepper_z` entries. Then query:
+Confirm the Klipper log contains Autotune entries for `stepper_x` and
+`stepper_y`, but not `stepper_z`. Save the initial register state:
 
 ```gcode
 DUMP_TMC STEPPER=stepper_x
 DUMP_TMC STEPPER=stepper_y
-DUMP_TMC STEPPER=stepper_z
 ```
 
-Perform the first home with a hand near the power switch and stop immediately if
-an axis fails to trigger normally. Do not begin a print until X, Y, and Z homing
-have each been verified.
+Perform the first home with the motion area clear and a hand near the power
+switch. Test low-speed moves first, then increase speed and acceleration while
+monitoring motor and TMC2240 temperatures. Do not print until repeated X/Y
+homing is reliable and no steps are lost.
 
-## Reconfigure or remove
+## Sources
 
-Change the printer-scoped motor values through Bespok3d's plugin configuration;
-it will rerender the file and restart Klipper. Uninstalling the plugin removes
-the managed extras and configuration include, then restarts Klipper with the
-stock driver settings.
+- [Klipper TMC Autotune upstream](https://github.com/andrewmcgr/klipper_tmc_autotune)
+- [Upstream motor database entry](https://github.com/andrewmcgr/klipper_tmc_autotune/blob/main/motor_database.cfg)
+- [Klipper configuration reference](https://www.klipper3d.org/Config_Reference.html#tmc2240)

@@ -2,10 +2,10 @@
 
 > [!IMPORTANT]
 > The `snapmaker-u1` branch packages this extension for the Snapmaker U1 through
-> Bespok3d. It targets BJ42D29-Y2V01 motors on the TMC2240 X/Y axes and a
-> BJ42D22-130 motor on the TMC2209 Z axis, preserves the U1's sensorless-homing
-> thresholds. The published X/Y constants are built in; the Z electrical profile
-> remains editable and defaults to values correlated with its stock run current.
+> Bespok3d. It targets upgraded LDO-42STH48-2504MACF motors on the TMC2240 X/Y
+> axes, tunes X/Y only with the `auto` goal, enables configurable small-hysteresis
+> mode, and preserves the U1's sensorless-homing path. Z and the extruders remain
+> on their stock driver configuration.
 >
 > See [Snapmaker U1 installation and configuration](docs/SNAPMAKER_U1.md). The
 > unmodified upstream history remains on the `main` branch.
@@ -96,6 +96,7 @@ All the `[autotune_tmc]` sections accept additional parameters to tweak the beha
 | motor |  | [See DB](motor_database.cfg) | This parameter is used to retrieve the physical constants of the motor connected to the TMC driver |
 | tuning_goal | `auto` | `auto`, `silent`, `performance`, and `autoswitch` | Parameter to choose how to fine-tune the TMC driver using StealthChop and tailored parameters. By opting for `auto`, it will automatically apply `performance` for the X and Y axes and `silent` for the Z axis and extruder unless the motor is very small. `autoswitch` is a highly experimental choice that enables dynamic switching between `silent` and `performance` modes in real-time when needed. However, at the moment, this transition can potentially be troublesome, resulting in unwanted behavior, noise disturbances and lost steps. Hence, it is recommended to avoid using `autoswitch` until these issues are fully resolved. |
 | extra_hysteresis | 0 | 0 to 8 | Additional hysteresis to reduce motor humming and vibration at low to medium speeds and maintain proper microstep accuracy. Warning: use only as much as necessary as a too high value will result in more chopper noise and motor power dissipation (ie. more heat) |
+| small_hysteresis | `False` | `True`, `False` | Enable the driver's small-hysteresis mode. It reduces hysteresis current and may reduce chopper noise and motor power dissipation, but can reduce the available hysteresis margin. At runtime use `AUTOTUNE_TMC STEPPER=<name> SMALL_HYSTERESIS=0|1` so the value remains part of Autotune's state. |
 | tbl | 1 | 0 to 3 | Comparator blank time. This time must safely cover the TMC switching events. A value of 1 (default) or 2 should be fine for most typical applications, but higher capacitive loads may require this to be set to 3. Also, lower values allow StealthChop to regulate to lower coil current values |
 | toff | 0 | 0 to 15 | Sets the slow decay time (off time) of the chopper cycle. This setting also limits the maximum chopper frequency. When set to 0, the value is automatically computed by this autotuning algorithm. Highest motor velocities sometimes benefit from forcing `toff` to 1 or 2 and a setting a short `tbl` of 1 or 0 |
 | sgt | 1 | -64 to 63 | Sensorless homing threshold for TMC5160, TMC2240, TMC2130, TMC2660. Set value appropriately if using sensorless homing (lower value means more sensitive detection and easier stall) |

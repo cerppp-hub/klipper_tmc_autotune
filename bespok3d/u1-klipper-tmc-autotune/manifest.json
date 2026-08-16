@@ -1,17 +1,17 @@
 {
   "name": "u1-klipper-tmc-autotune",
   "title": "TMC Autotune for Snapmaker U1",
-  "version": "0.2.0-u1.4",
-  "sw_version": "0.2.0+git.b6c7cfa",
+  "version": "0.2.0-u1.5",
+  "sw_version": "0.2.0+git.b6c7cfa.u1.1",
   "author": "Andrew McGregor and contributors; Snapmaker U1 adaptation contributors",
-  "description": "Packages Klipper TMC Autotune for the Snapmaker U1 vendor Klipper layout, using the published BJ42D29-Y2V01 profile on the TMC2240 X/Y axes and an editable Y2-winding profile for the BJ42D22-130 motor on the TMC2209 Z axis. Bespok3d renders a printer-specific configuration, preserves the stock sensorless-homing thresholds, and handles placement, restart, rollback, reconfiguration, and removal.",
-  "tagline": "Motor-aware TMC tuning with U1-safe configuration.",
+  "description": "Packages the current Klipper TMC Autotune source for a Snapmaker U1 upgraded to LDO-42STH48-2504MACF motors on the TMC2240 X/Y axes. It tunes X/Y only with the auto goal, enables configurable small-hysteresis mode, preserves sensorless homing, and leaves every writable registered TMC field available through Klipper's SET_TMC_FIELD console command.",
+  "tagline": "X/Y-only TMC tuning for LDO 0.9-degree U1 motion motors.",
   "category": "tuning",
   "channel": "experiment",
   "printer_specific": true,
   "changelog": "doc/CHANGELOG.md",
   "published_at": "2026-08-12",
-  "updated_at": "2026-08-12",
+  "updated_at": "2026-08-16",
   "min_daemon_version": "0.10.33",
   "source": "https://github.com/cerppp-hub/klipper_tmc_autotune/tree/snapmaker-u1",
   "publisher": "LOCAL-UNSIGNED",
@@ -22,19 +22,9 @@
   "conflicts": [],
   "requires": {
     "capabilities": ["klipper-generic"],
-    "variables": [
-      { "name": "U1_Z_RESISTANCE", "description": "BJ42D22-130 phase resistance in ohms from its exact datasheet or measurement.", "required": true },
-      { "name": "U1_Z_INDUCTANCE", "description": "BJ42D22-130 phase inductance in henries from its exact datasheet or measurement.", "required": true },
-      { "name": "U1_Z_HOLDING_TORQUE", "description": "BJ42D22-130 holding torque in newton-metres.", "required": true },
-      { "name": "U1_Z_MAX_CURRENT", "description": "BJ42D22-130 rated phase current in amperes.", "required": true }
-    ]
+    "variables": []
   },
-  "config": [
-    { "key": "U1_Z_RESISTANCE", "label": "BJ42D22-130 resistance (ohms)", "type": "number", "default": "4.0", "hint": "Y2-winding default: 4.0 ohms per phase. Override if an exact -130 sheet or measurement differs.", "required": true, "scope": "printer", "userEditable": true },
-    { "key": "U1_Z_INDUCTANCE", "label": "BJ42D22-130 inductance (henries)", "type": "number", "default": "0.0079", "hint": "Y2-winding default: 7.9 mH, expressed here as 0.0079 H.", "required": true, "scope": "printer", "userEditable": true },
-    { "key": "U1_Z_HOLDING_TORQUE", "label": "BJ42D22-130 holding torque (Nm)", "type": "number", "default": "0.40", "hint": "Y2-winding default: 400 mNm, expressed here as 0.40 Nm.", "required": true, "scope": "printer", "userEditable": true },
-    { "key": "U1_Z_MAX_CURRENT", "label": "BJ42D22-130 rated current (A)", "type": "number", "default": "1.0", "hint": "Y2-winding default: 1.0 A; the stock 0.85 A RMS run_current is 85% of this rating.", "required": true, "scope": "printer", "userEditable": true }
-  ],
+  "config": [],
   "permissions": ["klipper-extra", "klipper-config", "restart"],
   "install": {
     "templates": [
@@ -55,5 +45,5 @@
   "conflict_resolutions": [],
   "files": [],
   "license": "https://github.com/cerppp-hub/klipper_tmc_autotune/blob/snapmaker-u1/LICENSE",
-  "attributions": "Klipper TMC Autotune is copyright Andrew McGregor and contributors and is licensed under GPL-3.0. This package is based on upstream commit b6c7cfa98c2ef880812d5279a9117cbe67d6d4d5. The Snapmaker U1 adaptation adds Bespok3d packaging, a variable-rendered U1 configuration, compatibility tests, and documentation; it does not alter the upstream tuning algorithm. Complete corresponding source is available in the public fork."
+  "attributions": "Klipper TMC Autotune is copyright Andrew McGregor and contributors and is licensed under GPL-3.0. This package is based on upstream commit b6c7cfa98c2ef880812d5279a9117cbe67d6d4d5, which includes the TOFF persistence fix from a4f4daa0b3512b751bb95cd20759e36a4963c25f. The Snapmaker U1 adaptation adds Bespok3d packaging, an X/Y-only LDO motor configuration, a configurable small_hysteresis option, compatibility tests, and documentation. Complete corresponding source is available in the public fork."
 }

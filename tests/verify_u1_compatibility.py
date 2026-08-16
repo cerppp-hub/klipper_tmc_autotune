@@ -33,17 +33,10 @@ def verify_manifest() -> None:
     manifest = json.loads((PACKAGE_ROOT / "manifest.json").read_text(encoding="utf-8"))
     assert manifest["channel"] == "experiment"
     assert manifest["install"]["restart"] == ["klipper"]
-    assert manifest["version"] == "0.2.0-u1.4"
-    assert len(manifest["requires"]["variables"]) == 4
-    assert all(field["scope"] == "printer" for field in manifest["config"])
-    assert all(field["required"] for field in manifest["config"])
-    defaults = {field["key"]: field["default"] for field in manifest["config"]}
-    assert defaults == {
-        "U1_Z_RESISTANCE": "4.0",
-        "U1_Z_INDUCTANCE": "0.0079",
-        "U1_Z_HOLDING_TORQUE": "0.40",
-        "U1_Z_MAX_CURRENT": "1.0",
-    }
+    assert manifest["version"] == "0.2.0-u1.5"
+    assert manifest["sw_version"] == "0.2.0+git.b6c7cfa.u1.1"
+    assert manifest["requires"]["variables"] == []
+    assert manifest["config"] == []
     classes = [entry["class"] for entry in manifest["install"]["place"]]
     assert classes.count("klipper-extra") == 3
     assert classes.count("klipper-config") == 1
@@ -52,31 +45,53 @@ def verify_manifest() -> None:
 def verify_template() -> None:
     text = TEMPLATE.read_text(encoding="utf-8")
     placeholders = set(re.findall(r"\$U1_[A-Z_]+", text))
-    assert len(placeholders) == 4
+    assert placeholders == set()
     require_text(
         TEMPLATE,
         (
             "[autotune_tmc stepper_x]",
             "[autotune_tmc stepper_y]",
-            "[autotune_tmc stepper_z]",
-            "[motor_constants keli-bj42d29-y2v01]",
-            "[motor_constants keli-bj42d22-130]",
-            "motor: keli-bj42d29-y2v01",
-            "motor: keli-bj42d22-130",
-            "steps_per_revolution: 200",
-            "resistance: 2.2",
-            "inductance: 0.0045",
-            "holding_torque: 0.60",
-            "max_current: 1.5",
-            "tuning_goal: performance",
+            "motor: ldo-42sth48-2504macf",
+            "tuning_goal: auto",
+            "small_hysteresis: True",
             "sgt: 1",
             "sg4_thrs: 0",
-            "sg4_thrs: 110",
         ),
     )
-    assert "STEPS_PER_REVOLUTION" not in text
-    assert "U1_XY_" not in text
+    assert "[autotune_tmc stepper_z]" not in text
     assert "[autotune_tmc extruder" not in text
+
+
+def verify_u1_runtime_field_access() -> None:
+    require_text(
+        REPO_ROOT / "autotune_tmc.py",
+        (
+            'config.getboolean(\n            "small_hysteresis"',
+            'gcmd.get_int("SMALL_HYSTERESIS", None)',
+            'self._set_driver_field("small_hysteresis", self.small_hysteresis)',
+            "see GH-354",
+        ),
+    )
+    require_text(
+        REPO_ROOT / "motor_database.cfg",
+        (
+            "[motor_constants ldo-42sth48-2504macf]",
+            "holding_torque: 0.45",
+            "steps_per_revolution: 400",
+        ),
+    )
+    require_text(
+        U1_ROOT / "klippy" / "extras" / "tmc.py",
+        (
+            'gcode.register_mux_command("SET_TMC_FIELD"',
+            "reg_name = self.fields.lookup_register(field_name, None)",
+            "reg_val = self.fields.set_field(field_name, value)",
+        ),
+    )
+    require_text(
+        U1_ROOT / "klippy" / "extras" / "tmc2240.py",
+        ('"en_pwm_mode":', '"small_hysteresis":'),
+    )
 
 
 def verify_u1_contract() -> None:
@@ -118,4 +133,5 @@ if __name__ == "__main__":
     verify_manifest()
     verify_template()
     verify_u1_contract()
+    verify_u1_runtime_field_access()
     print("Snapmaker U1 TMC Autotune compatibility contract verified")

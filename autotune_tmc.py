@@ -153,6 +153,9 @@ class AutotuneTMC:
         self.extra_hysteresis = config.getint(
             "extra_hysteresis", default=EXTRA_HYSTERESIS, minval=0, maxval=8
         )
+        self.small_hysteresis = config.getboolean(
+            "small_hysteresis", default=SMALL_HYSTERESIS
+        )
         self.tbl = config.getint("tbl", default=TBL, minval=0, maxval=3)
         self.toff = config.getint("toff", default=TOFF, minval=0, maxval=15)
         self.tpfd = config.getint("tpfd", default=None, minval=0, maxval=15)
@@ -300,6 +303,14 @@ class AutotuneTMC:
             else:
                 gcmd.respond_info(
                     f"EXTRA_HYSTERESIS={extra_hysteresis} out of range (0-8), ignored"
+                )
+        small_hysteresis = gcmd.get_int("SMALL_HYSTERESIS", None)
+        if small_hysteresis is not None:
+            if small_hysteresis in (0, 1):
+                self.small_hysteresis = bool(small_hysteresis)
+            else:
+                gcmd.respond_info(
+                    f"SMALL_HYSTERESIS={small_hysteresis} out of range (0-1), ignored"
                 )
         tbl = gcmd.get_int("TBL", None)
         if tbl is not None:
@@ -610,7 +621,7 @@ class AutotuneTMC:
         self._set_driver_velocity_field("tcoolthrs", coolthrs)
         self._set_driver_field("sgt", self.sgt)
         self._set_driver_field("faststandstill", FAST_STANDSTILL)
-        self._set_driver_field("small_hysteresis", SMALL_HYSTERESIS)
+        self._set_driver_field("small_hysteresis", self.small_hysteresis)
         self._set_driver_field("semin", self.se_min)
         self._set_driver_field("semax", self.se_max)
         self._set_driver_field("seup", self.se_up)

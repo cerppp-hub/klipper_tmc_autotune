@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0-u1.5 - 2026-08-16
+
+- Retarget X/Y to the upstream `ldo-42sth48-2504macf` motor profile (0.9 degree, 2.5 A, 0.45 Nm).
+- Tune only the TMC2240 X/Y axes using `tuning_goal: auto`; Z and all toolhead extruders stay stock.
+- Enable small-hysteresis mode on X/Y and expose it as both an Autotune config option and `AUTOTUNE_TMC ... SMALL_HYSTERESIS=0|1` runtime parameter.
+- Confirm the packaged upstream snapshot includes the virtual-enable TOFF persistence fix.
+- Document unrestricted `SET_TMC_FIELD` access and the distinction between raw field writes and Autotune-managed state.
+
 ## 0.2.0-u1.4 - 2026-08-12
 
 - Identify the X/Y motors as Keli BJ42D29-Y2V01.
